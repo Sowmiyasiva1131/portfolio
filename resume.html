@@ -1,158 +1,566 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sowmiya | Resume</title>
-  <style>
-    /* General Styles */
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      color: #222;
- 
-                  linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
-      background-attachment: fixed;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sowmiya | Interactive Resume</title>
 
-    header {
-      background: rgba(75, 0, 130, 0.85);
-      color: white;
-      text-align: center;
-      padding: 50px 20px;
-      border-bottom-left-radius: 30px;
-      border-bottom-right-radius: 30px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
+<!-- Optional: load Poppins for nicer typography -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-    header h1 {
-      margin: 0;
-      font-size: 2.5em;
-    }
+<style>
+  :root{
+    --bg-1: #eaf6ff;
+    --bg-2: #ffffff;
+    --accent: #2f6fd6;
+    --panel: #f9fbff;
+    --muted: #213241;
+    --menu-w: 320px;
+    --max-content-w: 900px;
+  }
 
-    header p {
-      margin: 8px 0;
-      font-size: 1.1em;
-    }
+  html,body { height:100%; margin:0; font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:var(--muted); background: linear-gradient(180deg,var(--bg-1),var(--bg-2)); overflow:hidden; }
 
-    section {
-      max-width: 850px;
-      margin: 30px auto;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 25px 30px;
-      border-radius: 15px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-    }
+  /* Layout */
+  .app {
+    display:flex;
+    height:100vh;
+    width:100vw;
+  }
 
-    h2 {
-      color: #4B0082;
-      margin-top: 0;
-      border-bottom: 2px solid #ddd;
-      padding-bottom: 5px;
-    }
+  /* LEFT MENU */
+  .menu {
+    width: var(--menu-w);
+    min-width: var(--menu-w);
+    background: linear-gradient(180deg, rgba(47,111,214,0.06), rgba(47,111,214,0.03));
+    padding:28px 20px;
+    box-shadow: 6px 0 18px rgba(36,60,88,0.06);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    position:fixed;
+    top:0; left:0; bottom:0;
+    z-index:40;
+  }
 
-    ul {
-      padding-left: 20px;
-      line-height: 1.6;
-    }
+  .menu .brand {
+    font-size:1.2rem;
+    font-weight:700;
+    color:var(--accent);
+    margin-bottom:8px;
+  }
+  .menu .subtitle {
+    font-size:0.95rem;
+    color:#4b5563;
+    margin-bottom:14px;
+  }
 
-    li {
-      margin-bottom: 8px;
-    }
+  .menu button {
+    background:transparent;
+    border:0;
+    text-align:left;
+    padding:12px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    transition: all .22s ease;
+    font-size:1.05rem;
+    color:var(--muted);
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .menu button:hover { transform: translateX(6px); background: rgba(47,111,214,0.08); }
+  .menu button.active { background: var(--accent); color: #fff; transform: translateX(6px); }
 
-    /* Skills badges */
-    .skills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+  /* Right content area */
+  .stage {
+    margin-left: var(--menu-w);
+    flex:1;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:36px;
+  }
 
-    .skill-badge {
-      background: #e8e0f7;
-      color: #4B0082;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: 500;
-      font-size: 0.9em;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+  /* bubble canvas behind content */
+  #bubble-layer {
+    position:absolute; inset:0; z-index:1; pointer-events:none; /* pointer-events toggled per-bubble */
+    background: radial-gradient(circle at 20% 10%, rgba(255,255,255,0.25), transparent 10%), transparent;
+  }
 
-    /* Mobile responsive */
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 2em;
-      }
-      section {
-        padding: 15px 20px;
-      }
-    }
-  </style>
+  /* BUBBLES (dynamically created) */
+  .bubble {
+    position:absolute;
+    border-radius:50%;
+    pointer-events:auto;
+    mix-blend-mode: normal;
+    box-shadow: 0 10px 20px rgba(31,80,169,0.12), inset 0 -6px 12px rgba(255,255,255,0.12);
+    transition: transform .18s ease, opacity .18s ease;
+    will-change: transform, opacity, top;
+    cursor:pointer;
+  }
+  .bubble.burst {
+    animation: bubbleBurst .45s forwards ease-out;
+  }
+  @keyframes bubbleBurst {
+    0% { transform: scale(1); opacity:1; }
+    100% { transform: scale(1.9); opacity:0; }
+  }
+
+  /* Initial big bubble center */
+  .big-bubble {
+    width: 310px;
+    height: 310px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.15rem;
+    text-align:center;
+    padding:18px;
+    color:#08306b;
+    font-weight:700;
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6));
+    border: 6px solid rgba(47,111,214,0.12);
+    box-shadow: 0 30px 60px rgba(47,111,214,0.12), 0 6px 20px rgba(9,30,66,0.06);
+    pointer-events:auto;
+    z-index:6;
+    border-radius:50%;
+  }
+  .big-bubble .hint { font-weight:600; font-size:1rem; color:#0b2a66; opacity:0.95; }
+
+  /* Content Card overlay (centered, large fonts) */
+  .card {
+    width: min(var(--max-content-w), 86%);
+    max-width: var(--max-content-w);
+    background: rgba(255,255,255,0.95);
+    padding: 40px 44px;
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(14,30,60,0.08);
+    z-index:5;
+    text-align:center;
+    opacity:0;
+    transform: translateY(18px) scale(0.99);
+    transition: all .5s cubic-bezier(.2,.9,.23,1);
+    pointer-events:auto;
+  }
+  .card.show {
+    opacity:1;
+    transform: translateY(0) scale(1);
+  }
+
+  .card h2 { margin:0 0 10px 0; color:var(--accent); font-size:2rem; }
+  .card p { font-size:1.12rem; line-height:1.6; color:var(--muted); margin:12px 0; }
+  .card ul { text-align:left; margin:12px auto; max-width:720px; font-size:1.05rem; color:var(--muted); }
+  .card .skill { display:inline-block; margin:8px 6px; padding:8px 14px; border-radius:18px; background:linear-gradient(180deg, #f0f7ff, #eef6ff); font-weight:600; font-size:1rem; opacity:0; transform: translateY(10px); }
+
+  /* speech bubble messages (floating) */
+  .speech {
+    position:absolute;
+    z-index:7;
+    left:50%;
+    transform: translateX(-50%);
+    bottom: 14%;
+    background: rgba(255,255,255,0.98);
+    padding: 14px 20px;
+    border-radius:18px;
+    box-shadow: 0 12px 40px rgba(9,30,66,0.08);
+    font-weight:600;
+    color: #0b314f;
+    font-size:1.05rem;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    opacity:0;
+    transform-origin:center;
+    transition: all .5s cubic-bezier(.2,.9,.23,1);
+  }
+  .speech.show { opacity:1; transform: translateX(-50%) translateY(-8px); }
+
+  /* restart button */
+  .restart {
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    z-index:90;
+    background: rgba(47,111,214,0.95);
+    color:#fff;
+    width:44px; height:44px;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; box-shadow: 0 10px 30px rgba(47,111,214,0.18);
+    border:0; font-weight:700;
+  }
+  .restart:hover { transform: translateY(-3px); }
+
+  /* small screens */
+  @media (max-width:900px) {
+    :root { --menu-w: 84px; }
+    .menu { width:84px; gap:8px; padding:20px 8px; }
+    .menu .brand, .menu .subtitle { display:none; }
+    .menu button { font-size:0.9rem; padding:10px; border-radius:8px; }
+    .card { padding:24px; }
+    .big-bubble { width: 220px; height:220px; font-size:0.95rem; }
+  }
+
+</style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <h1>Sowmiya</h1>
-    <p>Python & Web Developer | Trainer</p>
-    <p>Email: sowmiyaofficial1131@gmail.com</p>
-  </header>
+<div class="app">
+  <!-- LEFT MENU -->
+  <nav class="menu" aria-label="Resume sections">
+    <div class="brand">Sowmiya Shivan ⭐</div>
+    <div class="subtitle">Junior IT Specialist</div>
 
-  <!-- Education -->
-  <section>
-    <h2>Education</h2>
-    <ul>
-      <li>High School — Sri Vidhyalakshmi Matric Hr Sec School (2017 - 2019)</li>
-      <li>B.Tech Information Technology — Anna University (2019 - 2024)</li>
-    </ul>
-  </section>
+    <button data-section="home" class="active" title="Start">Home</button>
+    <button data-section="education" title="Education">Education</button>
+    <button data-section="skills" title="Skills">Skills</button>
+    <button data-section="projects" title="Projects">Projects</button>
+    <button data-section="experience" title="Experience">Experience</button>
+    <button data-section="achievements" title="Achievements">Achievements</button>
+  </nav>
 
-  <!-- Skills -->
-  <section>
-    <h2>Skills</h2>
-    <div class="skills">
-      <span class="skill-badge">Python</span>
-      <span class="skill-badge">SQL</span>
-      <span class="skill-badge">HTML</span>
-      <span class="skill-badge">CSS</span>
-      <span class="skill-badge">Web Development</span>
-      <span class="skill-badge">OOP</span>
-      <span class="skill-badge">Agile</span>
-      <span class="skill-badge">SDLC</span>
-     
-      <span class="skill-badge">Business Analysis</span>
+  <!-- RIGHT STAGE -->
+  <main class="stage" role="main" aria-live="polite">
+    <!-- bubble background layer -->
+    <div id="bubble-layer" aria-hidden="true"></div>
+
+    <!-- initial big bubble (center) -->
+    <div id="bigBubble" class="big-bubble" role="button" aria-label="Tap to start the adventure">
+      <div class="hint">✨ Tap to Start the Adventure</div>
     </div>
-  </section>
 
-  <!-- Projects -->
-  <section>
-    <h2>Projects</h2>
-    <ul>
-      <li>Plant Species Identifier with Oxygen Level Analysis</li>
-      <li>Sales Forecasting using Machine Learning</li>
-      <li>Student Management System (Python + SQLite)</li>
-      <li>Dynamic Portfolio Landing Page Generator</li>
-      <li>Course Enrollment & Attendance Analysis</li>
-    </ul>
-  </section>
+    <!-- speech message -->
+    <div id="speech" class="speech" aria-hidden="true"></div>
 
-  <!-- Experience -->
-  <section>
-    <h2>Experience</h2>
-    <ul>
-      <li>Trainer at WizKlub: Taught 500+ students coding & robotics (Scratch, Arduino, Alexa, Sensors, Python Web, C Programming)</li>
-    </ul>
-  </section>
+    <!-- content card (centered overlay) -->
+    <section id="contentCard" class="card" aria-live="polite" aria-atomic="true" role="region">
+      <!-- inserted dynamically -->
+    </section>
 
-  <!-- Achievements -->
-  <section>
-    <h2>Achievements</h2>
-    <ul>
-      <li>Certified Python Full Stack Developer</li>
-      <li>Trained in Agile & SDLC; connecting business needs with technical solutions</li>
-    </ul>
-  </section>
+    <!-- restart -->
+    <button id="restartBtn" class="restart" title="Restart (go to start)" aria-label="Restart">↻</button>
+  </main>
+</div>
 
+<script>
+/* ---------- Helpers & config ---------- */
+const bubbleLayer = document.getElementById('bubble-layer');
+const bigBubble = document.getElementById('bigBubble');
+const speechEl = document.getElementById('speech');
+const contentCard = document.getElementById('contentCard');
+const restartBtn = document.getElementById('restartBtn');
+const menuButtons = document.querySelectorAll('.menu button[data-section]');
+
+let bubbleInterval = null;
+let bubblesActive = false;
+let initialStarted = false;
+let achievementsTimeout = null;
+
+/* bubble colors (pastel palette) */
+const COLORS = ['#cfe9ff','#f7d9ff','#dfffe8','#ffe8ef','#e8f0ff','#fff0d9'];
+
+/* choose a friendly professional female voice if available */
+function speak(text) {
+  if (!('speechSynthesis' in window)) return; // not supported
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1.0;
+  utter.pitch = 1.05;
+  // attempt to select a female-sounding voice for en-US/en-GB
+  const voices = speechSynthesis.getVoices();
+  // prefer voices that include 'female' or common female names, fallback to en-US
+  let chosen = voices.find(v => /female/i.test(v.name)) ||
+               voices.find(v => /Samantha|Victoria|Karen|Allison|Google UK English Female|Google US English/i.test(v.name)) ||
+               voices.find(v => /en-US|en-GB/i.test(v.lang)) ||
+               voices[0];
+  if (chosen) utter.voice = chosen;
+  window.speechSynthesis.cancel(); // clear previous
+  window.speechSynthesis.speak(utter);
+}
+
+/* ---------- Big bubble startup ---------- */
+function startIntro() {
+  // show the big bubble center, hide card & speech
+  bigBubble.style.display = 'flex';
+  contentCard.classList.remove('show');
+  speechEl.classList.remove('show');
+  // stop any active bubble generation
+  stopBubbles();
+  initialStarted = false;
+}
+
+/* ---------- Bubble generation ---------- */
+function spawnMiniBubble(opts = {}) {
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  const size = opts.size || (10 + Math.random() * 70);
+  b.style.width = size + 'px';
+  b.style.height = size + 'px';
+  // random start x within visible stage (excluding menu)
+  const leftBound = document.querySelector('.stage').getBoundingClientRect().left + 40;
+  const rightBound = window.innerWidth - 40;
+  const x = Math.random() * (rightBound - leftBound) + leftBound;
+  b.style.left = x + 'px';
+  b.style.top = (window.innerHeight + 20) + 'px';
+  b.style.background = opts.color || COLORS[Math.floor(Math.random() * COLORS.length)];
+  b.style.opacity = 0.95;
+  // z-index low so content overlays it
+  b.style.zIndex = 2;
+  // float animation via JS (so bubbles continue even if content visible)
+  bubbleLayer.appendChild(b);
+  // gentle upward motion using requestAnimationFrame
+  const duration = 8000 + Math.random() * 8000;
+  const start = performance.now();
+  const startTop = window.innerHeight + 20;
+  const endTop = - (size + 20);
+  function frame(t) {
+    const progress = Math.min(1, (t - start) / duration);
+    // ease out
+    const eased = 1 - Math.pow(1 - progress, 1.8);
+    const curTop = startTop + (endTop - startTop) * eased;
+    b.style.top = curTop + 'px';
+    // slight x drift
+    const drift = Math.sin(progress * Math.PI * 2 + Math.random() * 10) * 40 * (1 - progress);
+    b.style.transform = `translateX(${drift}px)`;
+    if (progress < 1) {
+      b._raf = requestAnimationFrame(frame);
+    } else {
+      // remove when off screen
+      b.remove();
+    }
+  }
+  b._raf = requestAnimationFrame(frame);
+
+  // click to burst
+  b.addEventListener('pointerdown', (ev) => {
+    ev.stopPropagation();
+    burstBubble(b);
+  });
+  return b;
+}
+
+function burstBubble(b) {
+  if (!b) return;
+  // stop animation
+  cancelAnimationFrame(b._raf);
+  b.classList.add('burst');
+  setTimeout(() => { b.remove(); }, 420);
+}
+
+/* spawn bubbles endlessly */
+function startBubbles() {
+  if (bubbleInterval) clearInterval(bubbleInterval);
+  bubbleInterval = setInterval(() => {
+    // spawn a few bubbles randomly (tiny and moderate)
+    const count = 1 + Math.floor(Math.random()*2);
+    for (let i=0;i<count;i++){
+      spawnMiniBubble();
+    }
+  }, 550);
+  bubblesActive = true;
+}
+
+/* stop current bubble generation */
+function stopBubbles() {
+  if (bubbleInterval) { clearInterval(bubbleInterval); bubbleInterval = null; }
+  // also cancel RAFs of existing bubbles and remove them
+  const existing = Array.from(document.querySelectorAll('.bubble'));
+  existing.forEach(b => {
+    cancelAnimationFrame(b._raf);
+    b.remove();
+  });
+  bubblesActive = false;
+}
+
+/* ---------- Startup big bubble click ---------- */
+bigBubble.addEventListener('pointerdown', (e) => {
+  e.stopPropagation();
+  // burst effect for big bubble
+  bigBubble.classList.add('burst');
+  setTimeout(() => { bigBubble.style.display='none'; bigBubble.classList.remove('burst'); }, 420);
+  initialStarted = true;
+
+  // welcome speech and floating speech message
+  showSpeech('Welcome buddy! Let\'s explore my journey.');
+  speak('Welcome buddy. Let us explore my journey.');
+
+  // after short delay, hide speech and start mini bubbles
+  setTimeout(()=>{ hideSpeech(); startBubbles(); }, 1800);
+});
+
+/* show speech message */
+function showSpeech(text) {
+  speechEl.textContent = text;
+  speechEl.classList.add('show');
+}
+
+/* hide speech */
+function hideSpeech() {
+  speechEl.classList.remove('show');
+}
+
+/* ---------- Content rendering when menu clicked ---------- */
+function renderSection(section) {
+  // highlight active button
+  menuButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.section === section));
+
+  // content HTML and themes
+  let html = '';
+  if (section === 'home') {
+    html = `<h2>Welcome</h2>
+            <p>Tap the bubbles, pop to reveal — or choose a section from the left to view details. Enjoy exploring!</p>`;
+  } else if (section === 'education') {
+    html = `<h2>Education</h2>
+            <ul>
+              <li>High School — Sri Vidhyalakshmi Matric Hr Sec School (2017 - 2019)</li>
+              <li>B.Tech — Information Technology, Anna University (2019 - 2023)</li>
+            </ul>`;
+  } else if (section === 'skills') {
+    html = `<h2>Skills</h2>
+            <div id="skillContainer">
+              <span class="skill" style="animation-delay:.0s">Python</span>
+              <span class="skill" style="animation-delay:.12s">HTML</span>
+              <span class="skill" style="animation-delay:.24s">CSS</span>
+              <span class="skill" style="animation-delay:.36s">SQL</span>
+              <span class="skill" style="animation-delay:.48s">Web Development</span>
+              <span class="skill" style="animation-delay:.6s">Agile</span>
+              <span class="skill" style="animation-delay:.72s">SDLC</span>
+            </div>`;
+  } else if (section === 'projects') {
+    html = `<h2>Projects</h2>
+            <div id="projList">
+              <div class="proj bubble-proj">Plant Species Identifier</div>
+              <div class="proj bubble-proj">Sales Forecasting (ML)</div>
+              <div class="proj bubble-proj">Student Management System</div>
+              <div class="proj bubble-proj">Dynamic Portfolio Generator</div>
+              <div class="proj bubble-proj">Course Enrollment Analysis</div>
+            </div>`;
+  } else if (section === 'experience') {
+    html = `<h2>Experience</h2>
+            <ul>
+              <li><b>Ethnotech, Hindustan College (HITS)</b> — Junior IT Specialist (July 2025 – Present)<br/>
+                  Training students in Python and Web Development; designing course material and mentoring projects.</li>
+              <li><b>Wizklub</b> — Coding & Robotics Trainer<br/>
+                  Taught Python, logical programming, block-based tools, Tinkercad, and basic data analytics.</li>
+            </ul>`;
+  } else if (section === 'achievements') {
+    html = `<h2>Achievements & Certifications</h2>
+            <ul>
+              <li>Global Certification — HTML5 App Development (Certiport)</li>
+              <li>Global Certification — Python (Certiport)</li>
+            </ul>`;
+  }
+
+  // show card with content centered
+  contentCard.innerHTML = html;
+  contentCard.classList.add('show');
+
+  // animate visible skill badges
+  const skillEls = contentCard.querySelectorAll('.skill');
+  skillEls.forEach((el, i) => {
+    el.style.opacity = 0;
+    el.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+      el.style.transition = 'all .48s cubic-bezier(.2,.9,.23,1)';
+      el.style.opacity = 1;
+      el.style.transform = 'translateY(0)';
+    }, 120 * i + 80);
+  });
+
+  // When Achievements viewed -> trigger thanks message and auto-reset
+  if (section === 'achievements') {
+    if (achievementsTimeout) clearTimeout(achievementsTimeout);
+    achievementsTimeout = setTimeout(() => {
+      // show final message + speech
+      showSpeech('Thanks for exploring my work!');
+      speak('Thanks for exploring my work. See you soon.');
+      // auto reset after another short delay
+      setTimeout(() => {
+        hideSpeech();
+        // clear content and restart initial bubble
+        contentCard.classList.remove('show');
+        // remove active state from buttons except home
+        menuButtons.forEach(b => b.classList.remove('active'));
+        // restart initial state
+        resetToStart();
+      }, 2400);
+    }, 1500);
+  }
+}
+
+/* ---------- Restart / Reset ---------- */
+function resetToStart() {
+  // clear content
+  contentCard.classList.remove('show');
+  contentCard.innerHTML = '';
+  // remove bubbles & intervals
+  stopBubbles();
+  // show big bubble
+  bigBubble.style.display = 'flex';
+  // start short timer to re-enable click on big bubble; ensure initialStarted false
+  initialStarted = false;
+  // remove active states
+  menuButtons.forEach(b => b.classList.remove('active'));
+  document.querySelector('.menu button[data-section="home"]').classList.add('active');
+}
+
+/* ---------- Event wiring ---------- */
+menuButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const section = btn.dataset.section;
+    // on first action after start, if big bubble visible, hide it gracefully and start bubbles in background
+    if (bigBubble.style.display !== 'none' && !initialStarted) {
+      // simulate initial tap behavior: hide big bubble and pop it softly
+      bigBubble.classList.add('burst');
+      setTimeout(() => { bigBubble.style.display='none'; bigBubble.classList.remove('burst');}, 360);
+      initialStarted = true;
+      showSpeech('Welcome buddy! Let us explore my journey.');
+      speak('Welcome buddy. Let us explore my journey.');
+      setTimeout(() => { hideSpeech(); startBubbles(); }, 1400);
+    }
+    // render content (bubbles continue running behind)
+    renderSection(section);
+  });
+});
+
+// restart button
+restartBtn.addEventListener('click', () => {
+  stopBubbles();
+  resetToStart();
+});
+
+// clicking outside big bubble or content does NOT stop bubbles (we keep them running).
+// But clicking on stage when big bubble active should not close it; we want a clear restart mechanism only
+// For keyboard accessibility - escape to reset
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') resetToStart();
+});
+
+/* ---------- Auto start - show big bubble on load ---------- */
+window.addEventListener('load', () => {
+  // place big bubble centered
+  bigBubble.style.display = 'flex';
+  // ensure content cleared
+  contentCard.classList.remove('show');
+  contentCard.innerHTML = `<h2>Welcome</h2><p style="font-size:1.05rem">Tap the big bubble to begin the adventure.</p>`;
+  // highlight home menu
+  menuButtons.forEach(b => b.classList.toggle('active', b.dataset.section === 'home'));
+});
+
+/* ---------- Start bubbles only after initial tap; but allow restart to re-create initial state ---------- */
+function ensureBubblesRunning() {
+  if (!bubblesActive) startBubbles();
+}
+
+/* ---------- Graceful cleanup on page unload ---------- */
+window.addEventListener('beforeunload', () => {
+  stopBubbles();
+  window.speechSynthesis.cancel();
+});
+
+</script>
 </body>
 </html>
-
