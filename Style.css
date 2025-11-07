@@ -58,6 +58,7 @@ body {
 .nav-links {
     display: flex;
     gap: 1.5rem;
+    
 }
 
 .nav-links a {
@@ -320,5 +321,95 @@ p, ul {
 }
 
 
+/* Existing CSS remains unchanged above */
+
+/* --- PROFILE IMAGE UPDATE --- */
+.profile-photo-wrap {
+  height: 250px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-photo {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 6px 18px rgba(91, 45, 176, 0.25);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  animation: float 3s ease-in-out infinite;
+}
+
+.profile-photo:hover {
+  transform: scale(1.05);
+  animation: bounce 0.6s ease;
+}
+
+/* Soft floating idle motion */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Soft bounce animation */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+/* --- EXPERIENCE SECTION --- */
+.exp-block h3 {
+  color: var(--accent-dark);
+  margin-top: 1.2rem;
+  font-size: 1.4rem;
+}
+
+.exp-block .exp-duration {
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.exp-block ul {
+  margin-left: 1.5rem;
+  line-height: 1.7;
+}
+
+/* --- CERTIFICATIONS GRID --- */
+.certs-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  justify-content: center;
+}
+
+.certs-grid img {
+  width: 300px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.certs-grid img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* --- FADE-IN SCROLL ANIMATION --- */
+.fade-in {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 
