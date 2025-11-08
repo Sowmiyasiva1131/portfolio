@@ -19,7 +19,7 @@ html, body {
 }
 
 body {
-    background: var(--bg);
+    background: transparent; /* allow stars to show */
     color: var(--muted);
     font-size: 1.2rem;
     line-height: 1.8;
@@ -411,5 +411,6 @@ p, ul {
   opacity: 1;
   transform: translateY(0);
 }
+
 
 
