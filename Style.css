@@ -298,3 +298,39 @@ h2 {
         padding: 3rem 0;
     }
 }
+/* --- MOBILE NAVBAR FIX --- */
+@media (max-width: 900px) {
+  /* Stack navbar items */
+  .nav-inner {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 0;
+  }
+
+  /* Add spacing for logo and links */
+  .brand {
+    margin-bottom: 0.8rem;
+    font-size: 1.4rem;
+  }
+
+  /* Adjust nav links layout */
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+
+  .nav-links a {
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem;
+  }
+
+  /* Ensure background covers text when sticky */
+  .nav {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+
