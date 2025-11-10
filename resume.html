@@ -84,15 +84,20 @@
 
   /* Right content area */
   .stage {
-    margin-left: var(--menu-w);
-    flex:1;
-    position:relative;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:36px;
-  }
+  margin-left: var(--menu-w);
+  flex: 1;
+  position: relative;
+  overflow-y: auto; /* enables vertical scroll */
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* start from top instead of center */
+  padding: 36px;
+  height: 100vh;
+  scroll-behavior: smooth;
+}
+
 
   /* bubble canvas behind content */
   #bubble-layer {
@@ -596,5 +601,6 @@ window.addEventListener('beforeunload', () => {
 </script>
 </body>
 </html>
+
 
 
