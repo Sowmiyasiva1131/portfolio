@@ -217,31 +217,11 @@
   @media (max-width:900px) {
     :root { --menu-w: 84px; }
     .menu { width:84px; gap:8px; padding:20px 8px; }
-    .menu .brand, .menu .subtitle { display:none; }
     .menu button { font-size:0.9rem; padding:10px; border-radius:8px; }
     .card { padding:24px; }
     .big-bubble { width: 220px; height:220px; font-size:0.95rem; }
   }
-
-      /* Keep Resume button visible or scrollable on small screens */
-  .menu {
-    overflow-y: auto;
-    height: 100vh;
-  }
-
-  .menu button:last-child {
-    margin-bottom: 12px;
-  }
-
-  .menu::-webkit-scrollbar {
-    width: 6px;
-  }
-  .menu::-webkit-scrollbar-thumb {
-    background: rgba(47,111,214,0.25);
-    border-radius: 3px;
-  }
-
-
+    
 </style>
 </head>
 <body>
@@ -601,6 +581,7 @@ window.addEventListener('beforeunload', () => {
 </script>
 </body>
 </html>
+
 
 
 
